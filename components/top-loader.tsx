@@ -150,14 +150,16 @@ function TopLoaderInner() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-0.5"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-1"
     >
       <div
-        className="h-full rounded-r-full bg-primary transition-[width] duration-300 ease-out"
+        className="h-full rounded-r-full transition-[width] duration-300 ease-out"
         style={{
           width: `${progress}%`,
+          background:
+            "linear-gradient(90deg, oklch(0.72 0.19 200), oklch(0.62 0.24 265), oklch(0.65 0.28 330))",
           boxShadow:
-            "0 0 10px var(--primary), 0 0 5px var(--primary)",
+            "0 0 14px oklch(0.65 0.28 330 / 0.9), 0 0 6px oklch(0.62 0.24 265 / 0.9)",
         }}
       />
     </div>
