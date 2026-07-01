@@ -217,10 +217,10 @@ export function ScoreBoard({
                 variant="outline"
                 size="sm"
                 className="gap-1"
-                disabled={pending}
+                loading={pending}
                 onClick={() => unlock(currentGame)}
               >
-                <LockOpen className="h-4 w-4" />
+                {pending ? null : <LockOpen className="h-4 w-4" />}
                 마감 해제
               </Button>
             ) : null
@@ -229,7 +229,7 @@ export function ScoreBoard({
               type="button"
               size="sm"
               className="gap-1"
-              disabled={pending}
+              loading={pending}
               onClick={async () => {
                 const ok = await confirm({
                   title: `${currentGame}게임을 마감할까요?`,
@@ -241,7 +241,7 @@ export function ScoreBoard({
                 if (ok) lock(currentGame);
               }}
             >
-              <Lock className="h-4 w-4" />
+              {pending ? null : <Lock className="h-4 w-4" />}
               게임 마감
             </Button>
           )}

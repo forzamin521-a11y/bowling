@@ -27,7 +27,7 @@ async function action(_prev: State, formData: FormData): Promise<State> {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" loading={pending}>
       {pending ? "변경 중..." : "비밀번호 변경"}
     </Button>
   );

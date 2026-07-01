@@ -28,7 +28,7 @@ async function action(_prev: State, formData: FormData): Promise<State> {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
+    <Button type="submit" className="w-full" loading={pending}>
       {pending ? "로그인 중..." : "로그인"}
     </Button>
   );

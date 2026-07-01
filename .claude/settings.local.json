@@ -128,7 +128,9 @@
       "PowerShell(git config *)",
       "PowerShell(gh auth *)",
       "PowerShell(gh repo view forzamin521-a11y/bowling --json name,visibility,defaultBranchRef 2>&1)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "PowerShell(vercel *)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"https://ggbowling.vercel.app\" -Method Head -UseBasicParsing -ErrorAction SilentlyContinue; \"Status: $\\($r.StatusCode\\) $\\($r.StatusDescription\\)\")"
     ]
   }
 }

@@ -351,7 +351,7 @@ export function RegistrationForm({
             >
               취소
             </Button>
-            <Button type="button" onClick={confirmRegister} disabled={pending}>
+            <Button type="button" onClick={confirmRegister} loading={pending}>
               {pending ? "등록 중..." : "확인 후 등록"}
             </Button>
           </DialogFooter>

@@ -520,10 +520,10 @@ export function LaneBoard({
         <Button
           type="button"
           onClick={doSave}
-          disabled={pending}
+          loading={pending}
           className="ml-auto gap-1"
         >
-          <Save className="h-4 w-4" />
+          {pending ? null : <Save className="h-4 w-4" />}
           {pending ? "저장 중..." : "저장"}
         </Button>
       </div>

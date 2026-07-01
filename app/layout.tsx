@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { TopLoader } from "@/components/top-loader";
 
 import "./globals.css";
 
@@ -30,6 +32,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Suspense fallback={null}>
+            <TopLoader />
+          </Suspense>
           {children}
           <Toaster richColors position="top-center" />
         </ThemeProvider>

@@ -182,7 +182,7 @@ export function EventEditRow({
       </div>
 
       <div className="flex gap-2">
-        <Button type="button" size="sm" onClick={onSave} disabled={pending}>
+        <Button type="button" size="sm" onClick={onSave} loading={pending}>
           {pending ? "저장 중..." : "저장"}
         </Button>
         <Button

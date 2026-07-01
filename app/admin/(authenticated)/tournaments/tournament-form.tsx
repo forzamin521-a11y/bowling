@@ -20,7 +20,7 @@ type TournamentRow = Database["public"]["Tables"]["tournaments"]["Row"];
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" loading={pending}>
       {pending ? "저장 중..." : label}
     </Button>
   );

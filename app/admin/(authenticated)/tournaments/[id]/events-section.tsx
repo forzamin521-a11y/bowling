@@ -452,7 +452,7 @@ function AddEventInline({
 function SubmitInline() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="sm" disabled={pending}>
+    <Button type="submit" size="sm" loading={pending}>
       {pending ? "추가 중..." : "추가"}
     </Button>
   );

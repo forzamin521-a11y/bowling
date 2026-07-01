@@ -62,7 +62,7 @@ export function ConfirmDialog({
           <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             variant={destructive ? "destructive" : "default"}
-            disabled={pending}
+            loading={pending}
             onClick={handleConfirm}
           >
             {pending ? "처리 중..." : confirmLabel}

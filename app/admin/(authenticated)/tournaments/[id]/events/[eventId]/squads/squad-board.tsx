@@ -223,10 +223,11 @@ export function SquadBoard({
           type="button"
           variant="default"
           onClick={doSave}
-          disabled={pending || hasLockedGame}
+          loading={pending}
+          disabled={hasLockedGame}
           className="ml-auto gap-1"
         >
-          <Save className="h-4 w-4" />
+          {pending ? null : <Save className="h-4 w-4" />}
           {pending ? "저장 중..." : "저장"}
         </Button>
       </div>
