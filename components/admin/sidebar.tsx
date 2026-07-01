@@ -14,7 +14,6 @@ import {
   X,
 } from "lucide-react";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -140,12 +139,9 @@ function SidebarBody({
           <ExternalLink className="h-4 w-4" />
           공개 페이지
         </Link>
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate px-2 text-xs text-muted-foreground">
-            {userEmail}
-          </p>
-          <ThemeToggle className="shrink-0" />
-        </div>
+        <p className="truncate px-2 text-xs text-muted-foreground">
+          {userEmail}
+        </p>
         <form action={signOut} className="mt-2">
           <Button
             type="submit"

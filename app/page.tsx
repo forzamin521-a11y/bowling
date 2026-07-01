@@ -2,7 +2,6 @@ import Link from "next/link";
 import { CalendarDays, ChevronRight, MapPin, Trophy } from "lucide-react";
 
 import { StatusBadge } from "@/components/public/status-badge";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { TournamentStatus } from "@/lib/supabase/database.types";
@@ -47,8 +46,7 @@ export default async function PublicHome() {
               <h1 className="text-xl font-bold tracking-tight sm:text-2xl">대회 결과</h1>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <ThemeToggle />
+          <div className="flex items-center gap-1 pr-10 lg:pr-0">
             <Link
               href="/admin"
               className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
