@@ -1,101 +1,151 @@
-import Image from "next/image";
+import Link from "next/link";
+import { CalendarDays, ChevronRight, MapPin, Trophy } from "lucide-react";
 
-export default function Home() {
+import { StatusBadge } from "@/components/public/status-badge";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import type { TournamentStatus } from "@/lib/supabase/database.types";
+import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
+
+const STATUS_ORDER: Record<TournamentStatus, number> = {
+  ongoing: 0,
+  upcoming: 1,
+  finished: 2,
+};
+
+export default async function PublicHome() {
+  const supabase = await createClient();
+  const { data: tournaments } = await supabase
+    .from("tournaments_with_status")
+    .select("id, name, venue, start_date, end_date, status")
+    .order("start_date", { ascending: false });
+
+  const sorted = (tournaments ?? []).slice().sort((a, b) => {
+    const sa = STATUS_ORDER[a.status as TournamentStatus] ?? 9;
+    const sb = STATUS_ORDER[b.status as TournamentStatus] ?? 9;
+    if (sa !== sb) return sa - sb;
+    return a.start_date < b.start_date ? 1 : -1;
+  });
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-dvh bg-gradient-to-b from-primary/[0.04] to-transparent">
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <header className="mb-8 flex items-end justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <Trophy className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-xs font-medium tracking-wide text-muted-foreground">
+                경기도볼링협회
+              </p>
+              <h1 className="text-2xl font-bold tracking-tight">대회 결과</h1>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Link
+              href="/admin"
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+            >
+              관리자
+            </Link>
+          </div>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        {sorted.length === 0 ? (
+          <Card className="flex flex-col items-center gap-2 py-16 text-center">
+            <Trophy className="h-8 w-8 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground">
+              아직 등록된 대회가 없습니다.
+            </p>
+          </Card>
+        ) : (
+          <div className="grid gap-3">
+            {sorted.map((t) => {
+              const status = t.status as TournamentStatus;
+              const isOngoing = status === "ongoing";
+              const isUpcoming = status === "upcoming";
+
+              const card = (
+                <Card
+                  className={cn(
+                    "relative gap-0 overflow-hidden p-4 transition-all",
+                    isUpcoming
+                      ? "opacity-70"
+                      : "hover:shadow-md hover:-translate-y-0.5",
+                    isOngoing
+                      ? "ring-primary/30"
+                      : !isUpcoming && "hover:ring-primary/30",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "absolute inset-y-0 left-0 w-1",
+                      isOngoing
+                        ? "bg-primary"
+                        : isUpcoming
+                          ? "bg-border"
+                          : "bg-transparent",
+                    )}
+                  />
+                  <div className="flex items-start justify-between gap-3 pl-2">
+                    <div className="min-w-0">
+                      <h2 className="truncate text-base font-semibold leading-snug">
+                        {t.name}
+                      </h2>
+                      <div className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          {t.venue}
+                        </span>
+                        <span className="flex items-center gap-1.5 tabular-nums">
+                          <CalendarDays className="h-3.5 w-3.5 shrink-0" />
+                          {t.start_date} ~ {t.end_date}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <StatusBadge status={status} />
+                      {isUpcoming ? (
+                        <span className="text-xs font-medium text-muted-foreground">
+                          준비중
+                        </span>
+                      ) : (
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+
+              // 예정 대회는 아직 클릭 불가 — 준비중 안내만 노출
+              return isUpcoming ? (
+                <div
+                  key={t.id}
+                  className="block cursor-not-allowed"
+                  aria-disabled
+                  title="아직 준비중인 대회입니다."
+                >
+                  {card}
+                </div>
+              ) : (
+                <Link
+                  key={t.id}
+                  href={`/tournaments/${t.id}`}
+                  className="group block"
+                >
+                  {card}
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
