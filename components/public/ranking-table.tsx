@@ -301,26 +301,39 @@ function TeamBlock({
         </td>
       </tr>
       {/* 멤버 행 */}
-      {group.members.map((m) => (
-        <tr key={m.tournamentPlayerId} className="border-b last:border-0">
-          <td className="px-2 py-1.5 text-center font-mono text-xs text-muted-foreground">
-            {m.playerNumber}
-          </td>
-          <td className="px-2 py-1.5">{m.name}</td>
-          {games.map((g) => (
-            <MemberCell
-              key={g}
-              locked={lockedSet.has(g)}
-              score={m.games[g]}
-              counted={!team5 || (m.starterByGame?.[g] ?? false)}
-              team5={team5}
-            />
-          ))}
-          <td className="px-2 py-1.5" />
-          <td className="px-2 py-1.5" />
-          <td className="px-2 py-1.5" />
-        </tr>
-      ))}
+      {group.members.map((m) => {
+        // 개인 합계/평균: 해당 선수가 실제로 친 마감 게임 점수 기준
+        const memberScores = Object.values(m.games);
+        const memberTotal = memberScores.reduce((sum, s) => sum + s, 0);
+        const memberAvg = memberScores.length
+          ? memberTotal / memberScores.length
+          : null;
+        return (
+          <tr key={m.tournamentPlayerId} className="border-b last:border-0">
+            <td className="px-2 py-1.5 text-center font-mono text-xs text-muted-foreground">
+              {m.playerNumber}
+            </td>
+            <td className="px-2 py-1.5">{m.name}</td>
+            {games.map((g) => (
+              <MemberCell
+                key={g}
+                locked={lockedSet.has(g)}
+                score={m.games[g]}
+                counted={!team5 || (m.starterByGame?.[g] ?? false)}
+                team5={team5}
+              />
+            ))}
+            <td className="px-2 py-1.5 text-center tabular-nums">
+              {memberScores.length ? fmtScore(memberTotal) : "–"}
+            </td>
+            <td className="px-2 py-1.5 text-center tabular-nums">
+              {fmtAvg(memberAvg)}
+            </td>
+            {/* 핀차: 팀 전용이라 개인 열은 비움 */}
+            <td className="px-2 py-1.5" />
+          </tr>
+        );
+      })}
       {/* 팀 합계 행 */}
       <tr className="border-b bg-muted/10 font-semibold">
         <td className="px-2 py-1.5" />
