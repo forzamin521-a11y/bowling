@@ -23,7 +23,7 @@ import {
   categoryFullLabel,
   EVENT_TYPE_LABEL,
 } from "@/lib/domain/labels";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type {
   CategoryAge,
   EventType,
@@ -33,7 +33,7 @@ import type {
   TournamentStatus,
 } from "@/lib/supabase/database.types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function PublicRankingPage({
   params,
@@ -46,7 +46,7 @@ export default async function PublicRankingPage({
   const eid = Number(eventId);
   if (![tid, cid, eid].every(Number.isFinite)) notFound();
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: event } = await supabase
     .from("tournament_events")

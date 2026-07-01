@@ -17,14 +17,14 @@ import {
   GENDER_LABEL,
   GENDER_ORDER,
 } from "@/lib/domain/labels";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type {
   CategoryAge,
   Gender,
   TournamentStatus,
 } from "@/lib/supabase/database.types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function PublicTournamentPage({
   params,
@@ -35,7 +35,7 @@ export default async function PublicTournamentPage({
   const tid = Number(id);
   if (!Number.isFinite(tid)) notFound();
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const [{ data: tournament }, { data: withStatus }] = await Promise.all([
     supabase
       .from("tournaments")

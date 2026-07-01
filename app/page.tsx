@@ -6,10 +6,11 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { TournamentStatus } from "@/lib/supabase/database.types";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { cn } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+// 서울 CDN 엣지에서 캐시 서빙, 60초마다 백그라운드 재검증(ISR)
+export const revalidate = 60;
 
 const STATUS_ORDER: Record<TournamentStatus, number> = {
   ongoing: 0,
@@ -18,7 +19,7 @@ const STATUS_ORDER: Record<TournamentStatus, number> = {
 };
 
 export default async function PublicHome() {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: tournaments } = await supabase
     .from("tournaments_with_status")
     .select("id, name, venue, start_date, end_date, status")
@@ -43,7 +44,7 @@ export default async function PublicHome() {
               <p className="text-xs font-medium tracking-wide text-muted-foreground">
                 경기도볼링협회
               </p>
-              <h1 className="text-2xl font-bold tracking-tight">대회 결과</h1>
+              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">대회 결과</h1>
             </div>
           </div>
           <div className="flex items-center gap-1">

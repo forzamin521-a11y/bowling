@@ -130,7 +130,11 @@
       "PowerShell(gh repo view forzamin521-a11y/bowling --json name,visibility,defaultBranchRef 2>&1)",
       "PowerShell(git *)",
       "PowerShell(vercel *)",
-      "PowerShell($r = Invoke-WebRequest -Uri \"https://ggbowling.vercel.app\" -Method Head -UseBasicParsing -ErrorAction SilentlyContinue; \"Status: $\\($r.StatusCode\\) $\\($r.StatusDescription\\)\")"
+      "PowerShell($r = Invoke-WebRequest -Uri \"https://ggbowling.vercel.app\" -Method Head -UseBasicParsing -ErrorAction SilentlyContinue; \"Status: $\\($r.StatusCode\\) $\\($r.StatusDescription\\)\")",
+      "PowerShell(vercel list *)",
+      "PowerShell(Get-ChildItem -Path \"E:\\\\etc\\\\AC\\\\ai\\\\bowling1\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { $_.FullName })",
+      "Bash(grep -rn \"auth\\\\.\\\\|getUser\\\\|\\\\.user\\\\b\\\\|isAdmin\\\\|role\" app/tournaments/)",
+      "Bash(grep -rn \"await createClient\\(\\)\" app/tournaments/)"
     ]
   }
 }

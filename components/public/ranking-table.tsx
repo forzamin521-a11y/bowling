@@ -105,7 +105,7 @@ export function RankingTable({
             ))}
           </div>
         )}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Input
             value={affQ}
             onChange={(e) => setAffQ(e.target.value)}

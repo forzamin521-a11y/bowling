@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { CategoryRankings } from "@/components/category-rankings";
 import { categoryFullLabel } from "@/lib/domain/labels";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { CategoryAge, Gender } from "@/lib/supabase/database.types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function PublicCategoryPage({
   params,
@@ -18,7 +18,7 @@ export default async function PublicCategoryPage({
   const cid = Number(categoryId);
   if (!Number.isFinite(tid) || !Number.isFinite(cid)) notFound();
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
 
   const { data: category } = await supabase
     .from("tournament_categories")
