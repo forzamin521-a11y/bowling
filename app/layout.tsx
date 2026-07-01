@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { TopControls } from "@/components/top-controls";
 import { TopLoader } from "@/components/top-loader";
 
 import "./globals.css";
@@ -36,10 +36,8 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <TopLoader />
           </Suspense>
-          {/* 모든 페이지 우상단 고정 테마 토글 */}
-          <div className="fixed right-3 top-3 z-40">
-            <ThemeToggle className="border border-border/60 bg-background/70 shadow-sm backdrop-blur hover:bg-muted" />
-          </div>
+          {/* 모든 페이지 우상단 고정 컨트롤 (테마 토글 + 관리자 링크) */}
+          <TopControls />
           {children}
           <Toaster richColors position="top-center" />
         </ThemeProvider>
