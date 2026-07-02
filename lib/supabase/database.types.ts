@@ -187,6 +187,7 @@ export interface Database {
         Row: {
           id: number;
           tournament_id: number;
+          tournament_category_id: number;
           player_id: number;
           region_id: number;
           affiliation_name: string;
@@ -198,6 +199,7 @@ export interface Database {
         };
         Insert: {
           tournament_id: number;
+          tournament_category_id: number;
           player_id: number;
           region_id: number;
           affiliation_name: string;
@@ -206,6 +208,7 @@ export interface Database {
           registered_order: number;
         };
         Update: Partial<{
+          tournament_category_id: number;
           player_id: number;
           region_id: number;
           affiliation_name: string;

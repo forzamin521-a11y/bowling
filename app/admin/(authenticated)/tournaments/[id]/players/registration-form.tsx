@@ -35,10 +35,12 @@ type Entry = { name: string; playerId: number | null };
 
 export function RegistrationForm({
   tournamentId,
+  categoryId,
   regions,
   groupCounts,
 }: {
   tournamentId: number;
+  categoryId: number;
   regions: Region[];
   groupCounts: Record<string, number>;
 }) {
@@ -93,6 +95,7 @@ export function RegistrationForm({
   async function doRegister(entries: Entry[]) {
     const res = await registerPlayers({
       tournamentId,
+      categoryId,
       regionId: ridNum!,
       affiliationName: affiliation.trim(),
       entries,

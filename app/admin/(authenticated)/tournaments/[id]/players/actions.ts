@@ -195,6 +195,7 @@ async function createMasterPlayer(
 
 const registerSchema = z.object({
   tournamentId: z.coerce.number().int().positive(),
+  categoryId: z.coerce.number().int().positive(),
   regionId: z.coerce.number().int().positive(),
   affiliationName: z.string().trim().min(1),
   entries: z
@@ -210,6 +211,7 @@ const registerSchema = z.object({
 
 export async function registerPlayers(input: {
   tournamentId: number;
+  categoryId: number;
   regionId: number;
   affiliationName: string;
   entries: { name: string; playerId: number | null }[];
@@ -217,7 +219,8 @@ export async function registerPlayers(input: {
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) return { error: "입력값을 확인해주세요." };
 
-  const { tournamentId, regionId, affiliationName, entries } = parsed.data;
+  const { tournamentId, categoryId, regionId, affiliationName, entries } =
+    parsed.data;
   const supabase = await createClient();
 
   const affiliationId = await ensureAffiliation(
@@ -226,17 +229,23 @@ export async function registerPlayers(input: {
     affiliationName,
   );
 
-  // 현재 대회의 번호/순서 베이스 + 이미 등록된 선수
+  // 선수번호/등록순서는 대회 전체에서 유일 → 대회 스코프로 베이스 계산.
+  // 팀라벨 그룹(groupBase)만 종별 단위로 센다.
   const { data: existing } = await supabase
     .from("tournament_players")
-    .select("player_id, player_number, registered_order, region_id, affiliation_name")
+    .select(
+      "player_id, player_number, registered_order, tournament_category_id, region_id, affiliation_name",
+    )
     .eq("tournament_id", tournamentId);
 
   const rows = existing ?? [];
   let nextNumber = Math.max(0, ...rows.map((r) => r.player_number)) + 1;
   let nextOrder = Math.max(0, ...rows.map((r) => r.registered_order)) + 1;
   const groupBase = rows.filter(
-    (r) => r.region_id === regionId && r.affiliation_name === affiliationName,
+    (r) =>
+      r.tournament_category_id === categoryId &&
+      r.region_id === regionId &&
+      r.affiliation_name === affiliationName,
   ).length;
 
   const registeredIds = new Set(rows.map((r) => r.player_id));
@@ -282,6 +291,7 @@ export async function registerPlayers(input: {
 
     inserts.push({
       tournament_id: tournamentId,
+      tournament_category_id: categoryId,
       player_id: playerId,
       region_id: regionId,
       affiliation_name: affiliationName,
@@ -306,7 +316,7 @@ export async function registerPlayers(input: {
     }
   }
 
-  revalidatePath(`/admin/tournaments/${tournamentId}/players`);
+  revalidatePath(`/admin/tournaments/${tournamentId}/players/${categoryId}`);
 
   const parts: string[] = [];
   if (inserts.length > 0) {
@@ -326,6 +336,7 @@ export async function registerPlayers(input: {
 
 const updateSchema = z.object({
   tournamentId: z.coerce.number().int().positive(),
+  categoryId: z.coerce.number().int().positive(),
   tournamentPlayerId: z.coerce.number().int().positive(),
   name: z.string().trim().min(1),
   regionId: z.coerce.number().int().positive(),
@@ -334,6 +345,7 @@ const updateSchema = z.object({
 
 export async function updatePlayer(input: {
   tournamentId: number;
+  categoryId: number;
   tournamentPlayerId: number;
   name: string;
   regionId: number;
@@ -342,8 +354,14 @@ export async function updatePlayer(input: {
   const parsed = updateSchema.safeParse(input);
   if (!parsed.success) return { error: "입력값을 확인해주세요." };
 
-  const { tournamentId, tournamentPlayerId, name, regionId, affiliationName } =
-    parsed.data;
+  const {
+    tournamentId,
+    categoryId,
+    tournamentPlayerId,
+    name,
+    regionId,
+    affiliationName,
+  } = parsed.data;
   const supabase = await createClient();
 
   const affiliationId = await ensureAffiliation(
@@ -382,7 +400,7 @@ export async function updatePlayer(input: {
     return { error: error.message };
   }
 
-  revalidatePath(`/admin/tournaments/${tournamentId}/players`);
+  revalidatePath(`/admin/tournaments/${tournamentId}/players/${categoryId}`);
   return { message: "수정되었습니다." };
 }
 
@@ -390,6 +408,7 @@ export async function updatePlayer(input: {
 
 export async function deletePlayer(
   tournamentId: number,
+  categoryId: number,
   tournamentPlayerId: number,
 ): Promise<PlayerActionResult> {
   const supabase = await createClient();
@@ -401,6 +420,6 @@ export async function deletePlayer(
     .eq("tournament_id", tournamentId);
 
   if (error) return { error: error.message };
-  revalidatePath(`/admin/tournaments/${tournamentId}/players`);
+  revalidatePath(`/admin/tournaments/${tournamentId}/players/${categoryId}`);
   return {};
 }

@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 
 import { StatusBadge } from "@/components/public/status-badge";
-import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,7 +16,6 @@ import {
   GENDER_ORDER,
 } from "@/lib/domain/labels";
 import { createClient } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
 import type {
   CategoryAge,
   EventType,
@@ -180,30 +178,25 @@ export default async function TournamentDetailPage({
         <CardHeader>
           <CardTitle>운영 단계</CardTitle>
           <CardDescription>
-            아래 순서로 진행하세요. 레인 배정·점수 입력은 위 “세부종목”에서
-            종목별로 들어갑니다.
+            선수 등록·레인 배정·점수 입력은 모두 위 “세부종목”의 각 종별 카드에서
+            진행합니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ol className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <li className="flex-1">
-              <Link
-                href={`/admin/tournaments/${tournament.id}/players`}
-                className="group flex h-full items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:border-primary/40 hover:bg-accent"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                  1
+            <li className="flex flex-1 items-center gap-3 rounded-lg border border-dashed p-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+                1
+              </span>
+              <span className="min-w-0">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  선수 등록
                 </span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    <Users className="h-4 w-4 text-primary" />
-                    선수 등록
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    시/군·소속별 선수 등록
-                  </span>
+                <span className="text-xs text-muted-foreground">
+                  종별별 · 시/군·소속 단위
                 </span>
-              </Link>
+              </span>
             </li>
             <ChevronRight className="hidden h-4 w-4 shrink-0 text-muted-foreground/40 sm:block" />
             <li className="flex flex-1 items-center gap-3 rounded-lg border border-dashed p-3">
@@ -230,15 +223,6 @@ export default async function TournamentDetailPage({
               </span>
             </li>
           </ol>
-          <div className="mt-4 flex flex-wrap justify-end gap-2">
-            <Link
-              href={`/admin/tournaments/${tournament.id}/players`}
-              className={cn(buttonVariants(), "gap-1")}
-            >
-              <Users className="h-4 w-4" />
-              선수 등록
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>

@@ -136,6 +136,7 @@ export default async function LanesPage({
         "id, player_id, player_number, region_id, affiliation_name, team_label",
       )
       .eq("tournament_id", tid)
+      .eq("tournament_category_id", category.id)
       .order("player_number"),
     supabase.from("regions").select("id, name"),
   ]);

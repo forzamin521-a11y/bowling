@@ -109,6 +109,7 @@ export default async function SquadsPage({
       .from("tournament_players")
       .select("id, player_id, player_number, region_id, affiliation_name")
       .eq("tournament_id", tid)
+      .eq("tournament_category_id", category.id)
       .order("player_number"),
     supabase.from("regions").select("id, name"),
   ]);

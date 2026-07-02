@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Trash2, Plus, Grid2x2, ClipboardList, Trophy } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Grid2x2,
+  ClipboardList,
+  Trophy,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -87,7 +94,17 @@ export function EventsSection({
             <CardTitle className="text-base">
               {CATEGORY_AGE_LABEL[c.age]} {GENDER_LABEL[c.gender]}
             </CardTitle>
-            <CardAction>
+            <CardAction className="flex gap-1">
+              <Link
+                href={`/admin/tournaments/${tournamentId}/players/${c.id}`}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "gap-1",
+                )}
+              >
+                <Users className="h-4 w-4" />
+                선수 등록
+              </Link>
               <Link
                 href={`/admin/tournaments/${tournamentId}/rankings/${c.id}`}
                 className={cn(

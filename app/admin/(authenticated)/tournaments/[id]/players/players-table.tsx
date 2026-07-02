@@ -38,10 +38,12 @@ type Region = { id: number; name: string };
 
 export function PlayersTable({
   tournamentId,
+  categoryId,
   players,
   regions,
 }: {
   tournamentId: number;
+  categoryId: number;
   players: RegisteredPlayer[];
   regions: Region[];
 }) {
@@ -110,6 +112,7 @@ export function PlayersTable({
                   <EditRow
                     key={p.id}
                     tournamentId={tournamentId}
+                    categoryId={categoryId}
                     player={p}
                     regions={regions}
                     onClose={() => setEditingId(null)}
@@ -118,6 +121,7 @@ export function PlayersTable({
                   <ViewRow
                     key={p.id}
                     tournamentId={tournamentId}
+                    categoryId={categoryId}
                     player={p}
                     onEdit={() => setEditingId(p.id)}
                   />
@@ -133,15 +137,17 @@ export function PlayersTable({
 
 function ViewRow({
   tournamentId,
+  categoryId,
   player,
   onEdit,
 }: {
   tournamentId: number;
+  categoryId: number;
   player: RegisteredPlayer;
   onEdit: () => void;
 }) {
   const onDelete = async () => {
-    const r = await deletePlayer(tournamentId, player.id);
+    const r = await deletePlayer(tournamentId, categoryId, player.id);
     if (r?.error) toast.error(r.error);
   };
 
@@ -206,11 +212,13 @@ function ViewRow({
 
 function EditRow({
   tournamentId,
+  categoryId,
   player,
   regions,
   onClose,
 }: {
   tournamentId: number;
+  categoryId: number;
   player: RegisteredPlayer;
   regions: Region[];
   onClose: () => void;
@@ -229,6 +237,7 @@ function EditRow({
     startTransition(async () => {
       const r = await updatePlayer({
         tournamentId,
+        categoryId,
         tournamentPlayerId: player.id,
         name: name.trim(),
         regionId: rid,

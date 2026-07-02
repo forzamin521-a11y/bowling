@@ -209,11 +209,12 @@ create table tournament_events (
 create table tournament_players (
   id bigserial primary key,
   tournament_id bigint not null references tournaments(id) on delete cascade,
+  tournament_category_id bigint not null references tournament_categories(id) on delete cascade,  -- 종별
   player_id bigint not null references players(id),
   region_id smallint not null references regions(id),         -- 스냅샷
   affiliation_name text not null,                              -- 스냅샷
   player_number int not null,                                  -- 대회 내 고유 1부터
-  team_label text not null,                                    -- 'A','B','C'...
+  team_label text not null,                                    -- 'A','B','C'... (종별+시군+소속 6명 단위)
   registered_order int not null,                               -- 등록 순서 (라벨 재계산용)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -222,7 +223,8 @@ create table tournament_players (
 );
 
 create index idx_tp_tournament on tournament_players(tournament_id);
-create index idx_tp_affiliation on tournament_players(tournament_id, region_id, affiliation_name, team_label);
+create index idx_tp_category on tournament_players(tournament_category_id);
+create index idx_tp_affiliation on tournament_players(tournament_category_id, region_id, affiliation_name, team_label);
 
 
 -- 선수번호 다음 값 (대회 스코프)
@@ -242,10 +244,10 @@ end;
 $$;
 
 
--- 팀라벨 재계산 (대회 + 시/군 + 소속 단위)
+-- 팀라벨 재계산 (종별 + 시/군 + 소속 단위)
 -- 등록 순서대로 1~6 → A, 7~12 → B, 13~18 → C...
 create or replace function recalc_team_labels(
-  p_tournament_id bigint,
+  p_tournament_category_id bigint,
   p_region_id smallint,
   p_affiliation_name text
 )
@@ -257,7 +259,7 @@ begin
     select id,
            row_number() over (order by registered_order, id) as rn
     from tournament_players
-    where tournament_id = p_tournament_id
+    where tournament_category_id = p_tournament_category_id
       and region_id = p_region_id
       and affiliation_name = p_affiliation_name
   )
@@ -276,24 +278,27 @@ returns trigger
 language plpgsql
 as $$
 declare
-  v_tid bigint;
+  v_cat bigint;
   v_rid smallint;
   v_aff text;
 begin
   if (tg_op = 'DELETE') then
-    v_tid := old.tournament_id;
+    v_cat := old.tournament_category_id;
     v_rid := old.region_id;
     v_aff := old.affiliation_name;
   else
-    v_tid := new.tournament_id;
+    v_cat := new.tournament_category_id;
     v_rid := new.region_id;
     v_aff := new.affiliation_name;
   end if;
 
-  perform recalc_team_labels(v_tid, v_rid, v_aff);
+  perform recalc_team_labels(v_cat, v_rid, v_aff);
 
-  if (tg_op = 'UPDATE' and (old.region_id <> new.region_id or old.affiliation_name <> new.affiliation_name)) then
-    perform recalc_team_labels(old.tournament_id, old.region_id, old.affiliation_name);
+  if (tg_op = 'UPDATE' and (
+        old.tournament_category_id is distinct from new.tournament_category_id
+        or old.region_id <> new.region_id
+        or old.affiliation_name <> new.affiliation_name)) then
+    perform recalc_team_labels(old.tournament_category_id, old.region_id, old.affiliation_name);
   end if;
 
   return null;

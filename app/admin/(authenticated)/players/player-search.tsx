@@ -8,14 +8,29 @@ import { RegionCombobox } from "@/components/admin/region-combobox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { GENDER_LABEL } from "@/lib/domain/labels";
+import {
+  categoryFullLabel,
+  GENDER_LABEL,
+} from "@/lib/domain/labels";
 import { cn } from "@/lib/utils";
+import type { CategoryAge, Gender } from "@/lib/supabase/database.types";
 
 import { searchMasterPlayers, type MasterPlayerResult } from "./actions";
 
 type Region = { id: number; name: string };
+export type CategoryOption = { age: CategoryAge; gender: Gender };
 
-export function PlayerSearch({ regions }: { regions: Region[] }) {
+const ALL = "all";
+const catKey = (c: CategoryOption) => `${c.age}:${c.gender}`;
+
+export function PlayerSearch({
+  regions,
+  categories,
+}: {
+  regions: Region[];
+  categories: CategoryOption[];
+}) {
+  const [category, setCategory] = useState<string>(ALL);
   const [regionId, setRegionId] = useState("all");
   const [affiliation, setAffiliation] = useState("");
   const [name, setName] = useState("");
@@ -29,21 +44,46 @@ export function PlayerSearch({ regions }: { regions: Region[] }) {
   // 필터 변경 시 디바운스 검색
   useEffect(() => {
     const t = setTimeout(() => {
+      const active =
+        category === ALL ? null : categories.find((c) => catKey(c) === category);
       startTransition(async () => {
         const res = await searchMasterPlayers({
           regionId: regionId === "all" ? undefined : Number(regionId),
           affiliation: affiliation.trim() || undefined,
           name: name.trim() || undefined,
+          age: active?.age,
+          gender: active?.gender,
         });
         setResults(res);
         setLoaded(true);
       });
     }, 250);
     return () => clearTimeout(t);
-  }, [regionId, affiliation, name]);
+  }, [category, categories, regionId, affiliation, name]);
 
   return (
     <div className="grid gap-4">
+      {categories.length > 0 ? (
+        <div className="inline-flex w-full items-center gap-1 overflow-x-auto rounded-lg bg-muted p-[3px] text-muted-foreground">
+          <CategoryTab
+            label="전체"
+            active={category === ALL}
+            onClick={() => setCategory(ALL)}
+          />
+          {categories.map((c) => {
+            const key = catKey(c);
+            return (
+              <CategoryTab
+                key={key}
+                label={categoryFullLabel(c.age, c.gender)}
+                active={category === key}
+                onClick={() => setCategory(key)}
+              />
+            );
+          })}
+        </div>
+      ) : null}
+
       <div className="grid gap-3 sm:grid-cols-3">
         <RegionCombobox
           regions={regions}
@@ -136,5 +176,31 @@ export function PlayerSearch({ regions }: { regions: Region[] }) {
         </p>
       ) : null}
     </div>
+  );
+}
+
+function CategoryTab({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "inline-flex shrink-0 items-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap transition-colors",
+        active
+          ? "bg-background text-foreground shadow-sm"
+          : "hover:text-foreground",
+      )}
+    >
+      {label}
+    </button>
   );
 }
