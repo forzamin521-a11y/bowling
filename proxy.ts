@@ -51,14 +51,19 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 역할 검증
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  // 역할 검증: JWT(app_metadata.role)에서 우선 읽어 DB 조회를 생략한다.
+  // 아직 역할이 심기지 않은 구 토큰은 profiles 조회로 폴백(마이그레이션 과도기 호환).
+  let role = (user.app_metadata as { role?: string } | null)?.role;
+  if (!role) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    role = profile?.role;
+  }
 
-  if (!profile || !["admin", "super_admin"].includes(profile.role)) {
+  if (!role || !["admin", "super_admin"].includes(role)) {
     const url = request.nextUrl.clone();
     url.pathname = ADMIN_LOGIN_PATH;
     url.searchParams.set("error", "no_permission");

@@ -77,6 +77,28 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function handle_new_user();
 
+-- profiles.role 을 auth.users.raw_app_meta_data(→ JWT app_metadata.role)에 동기화.
+-- 미들웨어(proxy.ts)가 DB 조회 없이 역할을 읽기 위함.
+create or replace function sync_role_to_auth()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  update auth.users
+  set raw_app_meta_data =
+    coalesce(raw_app_meta_data, '{}'::jsonb)
+    || jsonb_build_object('role', new.role::text)
+  where id = new.id;
+  return new;
+end;
+$$;
+
+create trigger trg_sync_role_to_auth
+  after insert or update of role on profiles
+  for each row execute function sync_role_to_auth();
+
 
 -- ============================================================
 -- ## 시/군 마스터

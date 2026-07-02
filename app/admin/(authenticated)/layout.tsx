@@ -10,11 +10,14 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
+  // 미들웨어(proxy.ts)가 이미 getUser로 인증·권한을 검증했으므로
+  // 여기서는 이메일 표시용으로 쿠키 세션만 읽는다(네트워크 왕복 없음).
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user) redirect("/admin/login");
+  if (!session) redirect("/admin/login");
+  const user = session.user;
 
   return (
     <div className="flex h-screen flex-col lg:flex-row">
