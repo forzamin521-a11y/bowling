@@ -39,12 +39,12 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
   return (
     <>
       {/* 데스크톱 고정 사이드바 (lg 이상) */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground lg:flex">
+      <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground lg:flex print:hidden">
         <SidebarBody userEmail={userEmail} pathname={pathname} />
       </aside>
 
       {/* 모바일/태블릿 상단바 (lg 미만) */}
-      <header className="flex shrink-0 items-center gap-2 border-b bg-sidebar px-3 py-2.5 text-sidebar-foreground lg:hidden">
+      <header className="flex shrink-0 items-center gap-2 border-b bg-sidebar px-3 py-2.5 text-sidebar-foreground lg:hidden print:hidden">
         <Button
           variant="ghost"
           size="icon"

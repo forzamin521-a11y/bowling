@@ -20,7 +20,7 @@ export function TopControls() {
   const isAdmin = pathname?.startsWith("/admin") ?? false;
 
   return (
-    <div className="fixed right-3 top-3 z-40 flex items-center gap-1">
+    <div className="fixed right-3 top-3 z-40 flex items-center gap-1 print:hidden">
       {!isAdmin && (
         <Link
           href="/admin"

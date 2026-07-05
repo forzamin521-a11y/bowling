@@ -134,7 +134,17 @@
       "PowerShell(vercel list *)",
       "PowerShell(Get-ChildItem -Path \"E:\\\\etc\\\\AC\\\\ai\\\\bowling1\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { $_.FullName })",
       "Bash(grep -rn \"auth\\\\.\\\\|getUser\\\\|\\\\.user\\\\b\\\\|isAdmin\\\\|role\" app/tournaments/)",
-      "Bash(grep -rn \"await createClient\\(\\)\" app/tournaments/)"
+      "Bash(grep -rn \"await createClient\\(\\)\" app/tournaments/)",
+      "Bash(xargs -I{} sh -c 'echo \"=== {}\"; cat \"{}\"')",
+      "Bash(python -)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(pnpm install *)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(git config *)",
+      "Bash(gh auth *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

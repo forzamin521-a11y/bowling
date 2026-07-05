@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Award, ChevronLeft, ChevronRight, Users } from "lucide-react";
 
 import { StatusBadge } from "@/components/public/status-badge";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -121,10 +122,19 @@ export default async function TournamentDetailPage({
             </div>
             <p className="text-sm text-muted-foreground">{tournament.venue}</p>
           </div>
-          <DeleteTournamentButton
-            tournamentId={tournament.id}
-            tournamentName={tournament.name}
-          />
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/admin/tournaments/${tournament.id}/awards`}
+              className={buttonVariants({ variant: "outline" }) + " gap-1.5"}
+            >
+              <Award className="h-4 w-4" />
+              상장 출력
+            </Link>
+            <DeleteTournamentButton
+              tournamentId={tournament.id}
+              tournamentName={tournament.name}
+            />
+          </div>
         </div>
       </div>
 

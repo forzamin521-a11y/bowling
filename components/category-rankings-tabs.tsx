@@ -31,7 +31,7 @@ export function CategoryRankingsTabs({ tabs }: { tabs: RankingTab[] }) {
 
   return (
     <Tabs defaultValue={tabs[0].value} className="block min-w-0">
-      <TabsList className="mb-4 h-10 w-full justify-start overflow-x-auto">
+      <TabsList className="mb-4 h-10 w-full justify-start overflow-x-auto print:hidden">
         {tabs.map((t) => (
           <TabsTrigger key={t.value} value={t.value}>
             {t.label}

@@ -138,3 +138,144 @@
     font-family: var(--font-sans), "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   }
 }
+
+/* ---------------- 인쇄 (A4) ---------------- */
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+/* 상장 전용 페이지: 여백 없이 상장이 종이 전체를 쓴다 */
+@page cert {
+  size: A4;
+  margin: 0;
+}
+
+/* 인쇄 전용 포털(상장)은 화면에서 숨긴다 */
+.award-print-root {
+  display: none;
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  /* 상장 인쇄: 포털만 노출하고 나머지는 모두 숨김 */
+  body:has(.award-print-root) > *:not(.award-print-root) {
+    display: none !important;
+  }
+  .award-print-root {
+    display: block !important;
+  }
+  .a4-cert {
+    page: cert;
+    break-after: page;
+  }
+}
+
+/* ---------------- 상장 (A4 시트) ---------------- */
+
+.cert-sheet {
+  width: 210mm;
+  height: 296mm;
+  box-sizing: border-box;
+  padding: 12mm;
+  background: white;
+  color: #1c1917;
+  font-family: "Nanum Myeongjo", "Batang", "BatangChe", "Noto Serif KR", serif;
+  overflow: hidden;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.cert-frame {
+  height: 100%;
+  border: 1.2mm solid #b8912f;
+  padding: 2mm;
+  box-sizing: border-box;
+}
+
+.cert-inner {
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+  border: 0.35mm solid #b8912f;
+  padding: 16mm 18mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.cert-number {
+  align-self: flex-start;
+  font-size: 12pt;
+  min-height: 12pt;
+}
+
+.cert-title {
+  margin-top: 8mm;
+  font-size: 46pt;
+  font-weight: 700;
+  letter-spacing: 0.9em;
+  text-indent: 0.9em; /* letter-spacing 좌우 균형 보정 */
+  white-space: nowrap;
+}
+
+.cert-event {
+  margin-top: 12mm;
+  font-size: 16pt;
+}
+
+.cert-rank {
+  margin-top: 3mm;
+  font-size: 24pt;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.cert-recipient {
+  margin-top: 10mm;
+}
+
+.cert-affiliation {
+  font-size: 14pt;
+  color: #44403c;
+}
+
+.cert-names {
+  margin-top: 4mm;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+.cert-record {
+  margin-top: 4mm;
+  font-size: 13pt;
+  color: #44403c;
+}
+
+.cert-body {
+  margin-top: auto;
+  max-width: 140mm;
+  font-size: 15pt;
+  line-height: 2;
+  word-break: keep-all;
+}
+
+.cert-date {
+  margin-top: 10mm;
+  font-size: 14pt;
+}
+
+.cert-issuer {
+  margin-top: 7mm;
+  margin-bottom: 10mm;
+  font-size: 20pt;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+}
