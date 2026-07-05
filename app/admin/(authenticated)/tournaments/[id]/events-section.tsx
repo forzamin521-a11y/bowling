@@ -165,26 +165,34 @@ function EventRow({
     );
   }
 
+  const laneSet = event.lane_start !== null && event.lane_end !== null;
+
   return (
-    <li className="flex flex-col gap-2 rounded-md border bg-card px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-      <div className="text-sm">
-        <span className="font-medium">{EVENT_TYPE_LABEL[event.event_type]}</span>
-        <span className="ml-2 text-muted-foreground">
-          {event.games_count}게임
-          {event.event_type === "team5" && event.halftime_split_at !== null
-            ? ` · 전반 ${event.halftime_split_at}G / 후반 ${event.games_count - event.halftime_split_at}G`
-            : ""}
-          {" · 사용 레인 "}
-          {event.lane_start !== null && event.lane_end !== null
-            ? `${event.lane_start}~${event.lane_end}`
-            : "미설정"}
-          {" · 레인이동 "}
-          {event.lane_move_offset === 0
-            ? "없음"
-            : `${LANE_MOVE_DIRECTION_LABEL[event.lane_move_direction]} ${event.lane_move_offset}칸`}
+    <li className="rounded-lg border bg-card p-3">
+      {/* 종목명 + 설정 요약 칩 */}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        <span className="text-sm font-semibold">
+          {EVENT_TYPE_LABEL[event.event_type]}
         </span>
+        <MetaChip>{event.games_count}게임</MetaChip>
+        {event.event_type === "team5" && event.halftime_split_at !== null ? (
+          <MetaChip>
+            전반 {event.halftime_split_at}G · 후반{" "}
+            {event.games_count - event.halftime_split_at}G
+          </MetaChip>
+        ) : null}
+        <MetaChip warn={!laneSet}>
+          {laneSet ? `레인 ${event.lane_start}~${event.lane_end}` : "레인 미설정"}
+        </MetaChip>
+        <MetaChip>
+          {event.lane_move_offset === 0
+            ? "이동 없음"
+            : `이동 ${LANE_MOVE_DIRECTION_LABEL[event.lane_move_direction]} ${event.lane_move_offset}칸`}
+        </MetaChip>
       </div>
-      <div className="flex flex-wrap items-center gap-1">
+
+      {/* 운영 액션 */}
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
         <Link
           href={`/admin/tournaments/${tournamentId}/events/${event.id}/lanes`}
           className={cn(
@@ -215,20 +223,45 @@ function EventRow({
           <Trophy className="h-4 w-4" />
           순위
         </Link>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setEditing(true)}
-        >
-          수정
-        </Button>
-        <DeleteEventButton
-          tournamentId={tournamentId}
-          eventId={event.id}
-        />
+        <div className="ml-auto flex items-center gap-0.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            onClick={() => setEditing(true)}
+          >
+            수정
+          </Button>
+          <DeleteEventButton
+            tournamentId={tournamentId}
+            eventId={event.id}
+          />
+        </div>
       </div>
     </li>
+  );
+}
+
+/** 세부종목 설정 요약 칩. warn이면 주의 색으로 표시. */
+function MetaChip({
+  children,
+  warn,
+}: {
+  children: React.ReactNode;
+  warn?: boolean;
+}) {
+  return (
+    <span
+      className={cn(
+        "rounded-md px-1.5 py-0.5 text-xs tabular-nums",
+        warn
+          ? "bg-amber-500/10 font-medium text-amber-600 dark:text-amber-400"
+          : "bg-muted text-muted-foreground",
+      )}
+    >
+      {children}
+    </span>
   );
 }
 

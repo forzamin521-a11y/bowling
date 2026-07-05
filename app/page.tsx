@@ -35,14 +35,16 @@ export default async function PublicHome() {
       <div className="mx-auto max-w-3xl px-4 py-8">
         <header className="mb-8 flex items-end justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <span className="bg-brand-gradient flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-primary-foreground shadow-md shadow-primary/20">
               <Trophy className="h-5 w-5" />
             </span>
             <div>
-              <p className="text-xs font-medium tracking-wide text-muted-foreground">
+              <p className="text-brand-gradient text-xs font-bold tracking-wide">
                 경기도볼링협회
               </p>
-              <h1 className="text-xl font-bold tracking-tight sm:text-2xl">대회 결과</h1>
+              <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
+                대회 결과
+              </h1>
             </div>
           </div>
         </header>
@@ -77,7 +79,7 @@ export default async function PublicHome() {
                     className={cn(
                       "absolute inset-y-0 left-0 w-1",
                       isOngoing
-                        ? "bg-primary"
+                        ? "bg-brand-gradient"
                         : isUpcoming
                           ? "bg-border"
                           : "bg-transparent",

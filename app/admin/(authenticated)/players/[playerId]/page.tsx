@@ -4,11 +4,11 @@ import { ChevronLeft } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RankMedal, podiumRowClass } from "@/components/public/rank-medal";
 import {
   categoryFullLabel,
   EVENT_TYPE_LABEL,
   GENDER_LABEL,
-  MEDAL_EMOJI,
 } from "@/lib/domain/labels";
 import { createClient } from "@/lib/supabase/server";
 import type {
@@ -306,6 +306,9 @@ export default async function PlayerProfilePage({
     .filter((v): v is number => v != null);
   const bestAvg = allAvgs.length ? Math.max(...allAvgs) : null;
   const bestRank = awards.length ? awards[0].rank : null;
+  const medalCounts = [1, 2, 3].map(
+    (r) => awards.filter((a) => a.rank === r).length,
+  );
   const initial = player.name.trim().slice(0, 1) || "?";
 
   return (
@@ -319,69 +322,96 @@ export default async function PlayerProfilePage({
       </Link>
 
       {/* 히어로 */}
-      <Card>
-        <CardContent className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
-              {initial}
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  {player.name}
-                </h2>
-                <Badge
-                  variant="outline"
-                  className="font-mono"
-                  title="선수 고유 ID (모든 대회에서 불변)"
-                >
-                  ID #{player.id}
-                </Badge>
-                {player.gender ? (
-                  <Badge variant="outline">
-                    {GENDER_LABEL[player.gender as Gender]}
-                    {player.birth_year ? ` · ${player.birth_year}년생` : ""}
-                  </Badge>
-                ) : null}
+      <Card className="gap-0 overflow-hidden p-0">
+        {/* 브랜드 밴드 */}
+        <div className="bg-brand-gradient h-16 sm:h-20" />
+        <CardContent className="px-5 pb-5">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-end gap-4">
+              <div className="-mt-8 flex size-16 shrink-0 items-center justify-center rounded-2xl bg-card text-2xl font-bold shadow-md ring-4 ring-card sm:-mt-10 sm:size-20 sm:text-3xl">
+                <span className="text-brand-gradient">{initial}</span>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {regionById.get(player.region_id) ?? ""} ·{" "}
-                {player.affiliation_name}
-              </p>
+              <div className="min-w-0 pb-0.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                    {player.name}
+                  </h2>
+                  {player.gender ? (
+                    <Badge variant="secondary">
+                      {GENDER_LABEL[player.gender as Gender]}
+                      {player.birth_year ? ` · ${player.birth_year}년생` : ""}
+                    </Badge>
+                  ) : null}
+                  <Badge
+                    variant="outline"
+                    className="font-mono text-muted-foreground"
+                    title="선수 고유 ID (모든 대회에서 불변)"
+                  >
+                    #{player.id}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-sm font-medium text-muted-foreground">
+                  {regionById.get(player.region_id) ?? ""} ·{" "}
+                  {player.affiliation_name}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:w-auto">
-            <HeroStat label="참가" value={`${participations.length}회`} />
-            <HeroStat
-              label="수상"
-              value={`${awards.length}회`}
-              hint={bestRank ? `최고 ${bestRank}위` : undefined}
-            />
-            <HeroStat
-              label="최고 평균"
-              value={bestAvg != null ? bestAvg.toFixed(1) : "–"}
-            />
+            <div className="grid shrink-0 grid-cols-3 gap-2">
+              <HeroStat label="참가 대회" value={`${participations.length}`} unit="회" />
+              <HeroStat
+                label="수상"
+                value={`${awards.length}`}
+                unit="회"
+                hint={bestRank ? `최고 ${bestRank}위` : undefined}
+              />
+              <HeroStat
+                label="최고 평균"
+                value={bestAvg != null ? bestAvg.toFixed(1) : "–"}
+                accent
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {awards.length > 0 && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex-row items-center justify-between">
             <CardTitle className="text-base">수상 이력</CardTitle>
+            <div className="flex items-center gap-3 text-sm font-medium tabular-nums">
+              {medalCounts[0] > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <RankMedal rank={1} /> {medalCounts[0]}
+                </span>
+              )}
+              {medalCounts[1] > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <RankMedal rank={2} /> {medalCounts[1]}
+                </span>
+              )}
+              {medalCounts[2] > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <RankMedal rank={3} /> {medalCounts[2]}
+                </span>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="grid gap-2 sm:grid-cols-2">
             {awards.map((a, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+                className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${podiumRowClass(a.rank)}`}
               >
-                <span className="text-lg">{MEDAL_EMOJI[a.rank] ?? ""}</span>
-                <span className="font-medium">{a.rank}위</span>
-                <span className="truncate text-muted-foreground">
-                  {a.tournamentName} · {a.label}
-                </span>
+                <RankMedal rank={a.rank} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">
+                    {a.tournamentName}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {a.label}
+                  </p>
+                </div>
               </div>
             ))}
           </CardContent>
@@ -396,16 +426,31 @@ export default async function PlayerProfilePage({
 function HeroStat({
   label,
   value,
+  unit,
   hint,
+  accent,
 }: {
   label: string;
   value: string;
+  unit?: string;
   hint?: string;
+  accent?: boolean;
 }) {
   return (
-    <div className="rounded-lg border bg-muted/30 px-3 py-2 text-center sm:min-w-[5rem]">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="text-lg font-semibold tabular-nums">{value}</div>
+    <div className="rounded-xl border bg-muted/30 px-3.5 py-2.5 text-center sm:min-w-[5.5rem]">
+      <div className="text-[11px] font-medium tracking-wide text-muted-foreground">
+        {label}
+      </div>
+      <div
+        className={`text-xl font-bold tabular-nums leading-tight ${accent ? "text-primary" : ""}`}
+      >
+        {value}
+        {unit ? (
+          <span className="ml-0.5 text-xs font-medium text-muted-foreground">
+            {unit}
+          </span>
+        ) : null}
+      </div>
       {hint ? (
         <div className="text-[10px] text-muted-foreground">{hint}</div>
       ) : null}

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { BarChart3, Table2 } from "lucide-react";
 
 import { LineChart, type LineSeries } from "@/components/charts/line-chart";
+import { RankMedal } from "@/components/public/rank-medal";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -103,31 +104,40 @@ export function PlayerHistory({
   );
 }
 
+function fmtDate(d: string) {
+  // "2025-06-21" -> "2025.06.21"
+  return d.replaceAll("-", ".");
+}
+
 function ParticipationCard({ p }: { p: Participation }) {
   return (
-    <div className="overflow-hidden rounded-lg border">
-      <div className="flex flex-wrap items-center gap-2 border-b bg-muted/40 px-3 py-2.5">
-        <Link
-          href={`/admin/tournaments/${p.tournamentId}`}
-          className="font-medium hover:underline"
-        >
-          {p.tournamentName}
-        </Link>
-        <Badge
-          variant={
-            p.status === "ongoing"
-              ? "default"
-              : p.status === "upcoming"
-                ? "secondary"
-                : "outline"
-          }
-        >
-          {TOURNAMENT_STATUS_LABEL[p.status]}
-        </Badge>
-        <span className="ml-auto text-xs text-muted-foreground">
-          {p.startDate} · {p.regionName} {p.affiliationName} · 대회배번{" "}
-          {p.playerNumber}
-        </span>
+    <div className="overflow-hidden rounded-xl border">
+      <div className="border-b bg-muted/40 px-3 py-2.5 sm:px-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/admin/tournaments/${p.tournamentId}`}
+            className="text-[15px] font-semibold leading-snug hover:underline"
+          >
+            {p.tournamentName}
+          </Link>
+          <Badge
+            variant={
+              p.status === "ongoing"
+                ? "default"
+                : p.status === "upcoming"
+                  ? "secondary"
+                  : "outline"
+            }
+          >
+            {TOURNAMENT_STATUS_LABEL[p.status]}
+          </Badge>
+          <span className="ml-auto text-xs tabular-nums text-muted-foreground">
+            {fmtDate(p.startDate)}
+          </span>
+        </div>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {p.regionName} {p.affiliationName} · 대회배번 {p.playerNumber}
+        </p>
       </div>
 
       {p.events.length === 0 ? (
@@ -146,68 +156,110 @@ function ParticipationCard({ p }: { p: Participation }) {
 }
 
 function EventHistoryRow({ event: e }: { event: EventHistory }) {
+  const lockedScores = e.games
+    .filter((g) => g.locked && g.score != null)
+    .map((g) => g.score as number);
+  const best = lockedScores.length ? Math.max(...lockedScores) : null;
+
   return (
-    <div className="px-3 py-3">
-      <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-        <span className="font-medium">
-          {e.label} {EVENT_TYPE_LABEL[e.eventType]}
+    <div className="px-3 py-3.5 sm:px-4">
+      <div className="mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+        {e.rank != null && e.rank <= 3 ? <RankMedal rank={e.rank} /> : null}
+        <span className="text-sm font-semibold">
+          {EVENT_TYPE_LABEL[e.eventType]}
         </span>
-        {e.rank != null ? (
-          <Badge variant="secondary">
-            {MEDAL_EMOJI[e.rank] ?? ""}
+        <span className="text-xs text-muted-foreground">{e.label}</span>
+        {e.rank != null && e.rank > 3 ? (
+          <Badge variant="outline" className="tabular-nums">
             {e.rank}위
           </Badge>
         ) : null}
         {e.teamLabel ? (
-          <span className="text-xs text-muted-foreground">
+          <Badge variant="ghost" className="text-muted-foreground">
             팀 {e.teamLabel}
-            {e.teamRank != null ? ` · 팀 ${e.teamRank}위` : ""}
-          </span>
+            {e.teamRank != null ? ` · ${e.teamRank}위` : ""}
+          </Badge>
         ) : null}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-max border-collapse text-sm">
-          <thead>
-            <tr className="text-xs text-muted-foreground">
-              {e.games.map((g) => (
-                <th key={g.game} className="px-2.5 py-1 text-center font-medium">
-                  {g.game}G
-                </th>
-              ))}
-              <th className="border-l px-2.5 py-1 text-center font-medium">
-                합계
-              </th>
-              <th className="px-2.5 py-1 text-center font-medium">평균</th>
-              <th className="px-2.5 py-1 text-center font-medium">핀차</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              {e.games.map((g) => (
-                <td
-                  key={g.game}
-                  className={cn(
-                    "px-2.5 py-1 text-center tabular-nums",
-                    g.locked
-                      ? "font-medium"
-                      : "text-muted-foreground/60",
-                  )}
-                >
-                  {g.locked ? (g.score ?? "–") : "·"}
-                </td>
-              ))}
-              <td className="border-l px-2.5 py-1 text-center font-semibold tabular-nums">
-                {e.total == null ? "–" : fmtScore(e.total)}
-              </td>
-              <td className="px-2.5 py-1 text-center tabular-nums">
-                {fmtAvg(e.avg)}
-              </td>
-              <td className="px-2.5 py-1 text-center tabular-nums text-muted-foreground">
-                {e.pinDiff == null ? "–" : fmtScore(e.pinDiff)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        {e.games.map((g) => {
+          const isBest = g.locked && g.score != null && g.score === best;
+          return (
+            <div
+              key={g.game}
+              className={cn(
+                "w-11 rounded-lg border py-1 text-center",
+                g.locked
+                  ? isBest
+                    ? "border-primary/40 bg-primary/[0.07]"
+                    : "bg-muted/40"
+                  : "border-dashed opacity-60",
+              )}
+              title={isBest ? "이 종목 최고 게임" : undefined}
+            >
+              <div className="text-[10px] leading-none text-muted-foreground">
+                {g.game}G
+              </div>
+              <div
+                className={cn(
+                  "mt-0.5 text-sm font-semibold tabular-nums leading-tight",
+                  isBest && "text-primary",
+                )}
+              >
+                {g.locked ? (g.score ?? "–") : "·"}
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="ms-auto flex items-center gap-1.5">
+          <SummaryChip
+            label="합계"
+            value={e.total == null ? "–" : fmtScore(e.total)}
+            strong
+          />
+          <SummaryChip label="평균" value={fmtAvg(e.avg)} />
+          {e.pinDiff != null && e.pinDiff !== 0 ? (
+            <SummaryChip label="핀차" value={fmtScore(e.pinDiff)} />
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SummaryChip({
+  label,
+  value,
+  strong,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-lg px-2.5 py-1 text-center",
+        strong ? "bg-primary/10" : "bg-muted/60",
+      )}
+    >
+      <div
+        className={cn(
+          "text-[10px] leading-none",
+          strong ? "text-primary/80" : "text-muted-foreground",
+        )}
+      >
+        {label}
+      </div>
+      <div
+        className={cn(
+          "mt-0.5 text-sm font-bold tabular-nums leading-tight",
+          strong && "text-primary",
+        )}
+      >
+        {value}
       </div>
     </div>
   );

@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import {
+  Award,
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Pencil,
+  Users,
+} from "lucide-react";
 
 import { StatusBadge } from "@/components/public/status-badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -141,10 +150,31 @@ export default async function TournamentDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>기본 정보</CardTitle>
-          <CardDescription>대회 기간·사용 레인·이동 규칙</CardDescription>
+          <CardDescription>
+            <span className="flex flex-wrap gap-x-4 gap-y-1 pt-0.5">
+              <span className="flex items-center gap-1.5 tabular-nums">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {tournament.start_date} ~ {tournament.end_date}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5" />
+                {tournament.venue}
+              </span>
+            </span>
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <TournamentForm mode="edit" initial={tournament} />
+          {/* 수정 폼은 평소에 접어둬 화면을 차지하지 않는다 */}
+          <details className="group">
+            <summary className="flex w-fit cursor-pointer select-none items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm font-medium transition-colors hover:bg-muted [&::-webkit-details-marker]:hidden">
+              <Pencil className="h-3.5 w-3.5" />
+              기본 정보 수정
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="mt-4 border-t pt-4">
+              <TournamentForm mode="edit" initial={tournament} />
+            </div>
+          </details>
         </CardContent>
       </Card>
 

@@ -49,7 +49,7 @@ export default async function AdminDashboard() {
       title: "진행 중 대회",
       description: "오늘 진행 중",
       value: counts.ongoing,
-      accent: "bg-primary",
+      accent: "bg-brand-gradient",
       valueClass: counts.ongoing > 0 ? "text-primary" : "",
     },
     {
@@ -73,7 +73,7 @@ export default async function AdminDashboard() {
       title: "등록 선수(누적)",
       description: "마스터 선수 수",
       value: playerCount ?? 0,
-      accent: "bg-amber-500",
+      accent: "bg-highlight",
       valueClass: "",
     },
   ];

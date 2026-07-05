@@ -53,7 +53,7 @@ export function AdminSidebar({ userEmail }: { userEmail: string }) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+        <span className="bg-brand-gradient flex h-8 w-8 items-center justify-center rounded-md text-primary-foreground shadow-sm">
           <Trophy className="h-4 w-4" />
         </span>
         <h1 className="text-sm font-semibold">경기도볼링협회 관리자</h1>
@@ -97,7 +97,7 @@ function SidebarBody({
   return (
     <>
       <div className="flex items-center gap-2.5 px-4 py-5">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+        <span className="bg-brand-gradient flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-primary-foreground shadow-sm">
           <Trophy className="h-5 w-5" />
         </span>
         <div className="min-w-0">
@@ -121,9 +121,9 @@ function SidebarBody({
               )}
             >
               {active && (
-                <span className="absolute inset-y-1.5 left-0 w-1 rounded-full bg-primary" />
+                <span className="bg-brand-gradient absolute inset-y-1.5 left-0 w-1 rounded-full" />
               )}
-              <Icon className="h-4 w-4" />
+              <Icon className={cn("h-4 w-4", active && "text-primary")} />
               {label}
             </Link>
           );

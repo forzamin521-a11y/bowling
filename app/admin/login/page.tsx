@@ -12,7 +12,7 @@ export default async function LoginPage({
     <div className="flex min-h-dvh items-center justify-center bg-gradient-to-b from-primary/[0.06] to-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center text-center">
-          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+          <span className="bg-brand-gradient flex h-12 w-12 items-center justify-center rounded-xl text-primary-foreground shadow-md shadow-primary/20">
             <Trophy className="h-6 w-6" />
           </span>
           <p className="mt-3 text-sm font-medium tracking-wide text-muted-foreground">
