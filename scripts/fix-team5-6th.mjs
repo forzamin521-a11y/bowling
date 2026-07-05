@@ -3,18 +3,21 @@
 // - 추가 멤버는 event_lineups 전 게임 role=bench 로 생성 (후반 교체는 UI에서)
 // - 멱등: 이미 6명이거나 채울 멤버가 없으면 건너뜀
 import { createClient } from "@supabase/supabase-js";
-import { readFileSync } from "node:fs";
+import { loadLocalEnv } from "./load-local-env.mjs";
 
-const env = {};
-for (const line of readFileSync(".env.local", "utf8").split("\n")) {
-  const m = line.match(/^([A-Z_]+)=(.*)$/);
-  if (m) env[m[1]] = m[2].trim();
+loadLocalEnv();
+
+const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!url || !key) {
+  console.error("✗ env not loaded:", { url: !!url, key: !!key });
+  process.exit(1);
 }
-const sb = createClient(
-  env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL,
-  env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false, autoRefreshToken: false } },
-);
+
+const sb = createClient(url, key, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 const MAX = 6;
 

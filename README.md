@@ -26,7 +26,11 @@ pnpm dev                            # http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...   # 시드 스크립트용 (선택)
+NEXT_PUBLIC_SITE_URL=...
 ```
+
+앱은 샘플 데이터 fallback 없이 위 환경변수의 Supabase 프로젝트를 직접 조회합니다.
+로컬 연결 확인은 `pnpm env:check`로 실행할 수 있습니다.
 
 ## 데이터베이스 마이그레이션
 
@@ -50,6 +54,7 @@ pnpm dev          # 개발 서버
 pnpm build        # 프로덕션 빌드
 pnpm test         # 도메인 단위 테스트 (vitest)
 pnpm tsc --noEmit # 타입 체크
+pnpm env:check    # .env.local 실제 Supabase 연결 확인
 ```
 
 ## 구조

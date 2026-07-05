@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "env:check": "node scripts/test-connection.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
