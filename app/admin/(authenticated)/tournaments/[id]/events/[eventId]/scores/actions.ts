@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireActiveEvent } from "@/lib/supabase/category-guards";
 
 export type ScoreActionResult = { error?: string; message?: string };
 
@@ -36,6 +37,8 @@ export async function upsertScore(input: {
   const { eventId, squadNumber, tournamentPlayerId, gameNumber, score } =
     parsed.data;
   const supabase = await createClient();
+  const event = await requireActiveEvent(supabase, parsed.data.tournamentId, eventId);
+  if ("error" in event) return { error: event.error };
 
   // 마감된 게임은 수정 불가 (이 선수 조 기준)
   const { data: gs } = await supabase
@@ -82,6 +85,9 @@ export async function lockGameAction(
   squadNumber: number = 1,
 ): Promise<ScoreActionResult> {
   const supabase = await createClient();
+  const event = await requireActiveEvent(supabase, tournamentId, eventId);
+  if ("error" in event) return { error: event.error };
+
   const { error } = await supabase.rpc("lock_game", {
     p_event_id: eventId,
     p_game_number: gameNumber,
@@ -99,6 +105,9 @@ export async function unlockGameAction(
   squadNumber: number = 1,
 ): Promise<ScoreActionResult> {
   const supabase = await createClient();
+  const event = await requireActiveEvent(supabase, tournamentId, eventId);
+  if ("error" in event) return { error: event.error };
+
   const { error } = await supabase.rpc("unlock_game", {
     p_event_id: eventId,
     p_game_number: gameNumber,

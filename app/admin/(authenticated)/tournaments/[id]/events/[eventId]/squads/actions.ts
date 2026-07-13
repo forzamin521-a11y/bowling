@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireActiveEvent } from "@/lib/supabase/category-guards";
 import type { Database } from "@/lib/supabase/database.types";
 
 export type SquadActionResult = { error?: string; message?: string };
@@ -32,21 +33,8 @@ export async function saveSquadAssignment(input: {
   const { tournamentId, eventId, squadCount, players } = parsed.data;
   const supabase = await createClient();
 
-  // 이벤트 + 소속 대회 검증
-  const { data: event } = await supabase
-    .from("tournament_events")
-    .select("id, tournament_category_id")
-    .eq("id", eventId)
-    .maybeSingle();
-  if (!event) return { error: "세부종목을 찾을 수 없습니다." };
-  const { data: category } = await supabase
-    .from("tournament_categories")
-    .select("id, tournament_id")
-    .eq("id", event.tournament_category_id)
-    .maybeSingle();
-  if (!category || category.tournament_id !== tournamentId) {
-    return { error: "대회 정보가 일치하지 않습니다." };
-  }
+  const activeEvent = await requireActiveEvent(supabase, tournamentId, eventId);
+  if ("error" in activeEvent) return { error: activeEvent.error };
 
   // 조 범위 검증
   if (players.some((p) => p.squad > squadCount)) {

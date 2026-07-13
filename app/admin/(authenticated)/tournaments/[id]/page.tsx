@@ -66,7 +66,7 @@ export default async function TournamentDetailPage({
 
   const { data: categories } = await supabase
     .from("tournament_categories")
-    .select("id, age, gender")
+    .select("id, age, gender, is_active")
     .eq("tournament_id", tid);
 
   const categoryIds = (categories ?? []).map((c) => c.id);
@@ -78,6 +78,44 @@ export default async function TournamentDetailPage({
         )
         .in("tournament_category_id", categoryIds)
     : { data: [] as const };
+
+  const eventIds = (events ?? []).map((e) => e.id);
+  const [{ data: playerCategoryRows }, { data: scoreEventRows }] =
+    await Promise.all([
+      categoryIds.length
+        ? supabase
+            .from("tournament_players")
+            .select("tournament_category_id")
+            .in("tournament_category_id", categoryIds)
+        : Promise.resolve({ data: [] as const }),
+      eventIds.length
+        ? supabase
+            .from("scores")
+            .select("tournament_event_id")
+            .in("tournament_event_id", eventIds)
+        : Promise.resolve({ data: [] as const }),
+    ]);
+
+  const playerCountByCategory = new Map<number, number>();
+  for (const row of playerCategoryRows ?? []) {
+    playerCountByCategory.set(
+      row.tournament_category_id,
+      (playerCountByCategory.get(row.tournament_category_id) ?? 0) + 1,
+    );
+  }
+
+  const eventCategoryById = new Map(
+    (events ?? []).map((event) => [event.id, event.tournament_category_id]),
+  );
+  const scoreCountByCategory = new Map<number, number>();
+  for (const row of scoreEventRows ?? []) {
+    const categoryId = eventCategoryById.get(row.tournament_event_id);
+    if (categoryId === undefined) continue;
+    scoreCountByCategory.set(
+      categoryId,
+      (scoreCountByCategory.get(categoryId) ?? 0) + 1,
+    );
+  }
 
   // 종별별 정렬 + 그 안의 세부종목 묶기
   const sortedCategories = (categories ?? [])
@@ -95,6 +133,12 @@ export default async function TournamentDetailPage({
       id: c.id,
       age: c.age as CategoryAge,
       gender: c.gender as Gender,
+      is_active: c.is_active,
+      player_count: playerCountByCategory.get(c.id) ?? 0,
+      event_count: (events ?? []).filter(
+        (event) => event.tournament_category_id === c.id,
+      ).length,
+      score_count: scoreCountByCategory.get(c.id) ?? 0,
       events: (events ?? [])
         .filter((e) => e.tournament_category_id === c.id)
         .map((e) => ({
@@ -182,7 +226,8 @@ export default async function TournamentDetailPage({
         <CardHeader>
           <CardTitle>참가 종별</CardTitle>
           <CardDescription>
-            이 대회에서 진행할 종별을 선택하세요.
+            이 대회에서 사용할 종별을 선택하세요. 사용 중지해도 등록 데이터는
+            보존됩니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -192,6 +237,12 @@ export default async function TournamentDetailPage({
               id: c.id,
               age: c.age as CategoryAge,
               gender: c.gender as Gender,
+              isActive: c.is_active,
+              playerCount: playerCountByCategory.get(c.id) ?? 0,
+              eventCount: (events ?? []).filter(
+                (event) => event.tournament_category_id === c.id,
+              ).length,
+              scoreCount: scoreCountByCategory.get(c.id) ?? 0,
             }))}
           />
         </CardContent>
@@ -207,7 +258,7 @@ export default async function TournamentDetailPage({
         <CardContent>
           <EventsSection
             tournamentId={tournament.id}
-            categories={sortedCategories}
+            categories={sortedCategories.filter((category) => category.is_active)}
           />
         </CardContent>
       </Card>

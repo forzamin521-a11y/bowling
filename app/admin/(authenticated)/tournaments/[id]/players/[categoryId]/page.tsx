@@ -46,13 +46,14 @@ export default async function CategoryPlayersPage({
     supabase.from("tournaments").select("id, name").eq("id", tid).maybeSingle(),
     supabase
       .from("tournament_categories")
-      .select("id, tournament_id, age, gender")
+      .select("id, tournament_id, age, gender, is_active")
       .eq("id", cid)
       .maybeSingle(),
     supabase
       .from("tournament_categories")
       .select("id, age, gender")
-      .eq("tournament_id", tid),
+      .eq("tournament_id", tid)
+      .eq("is_active", true),
     supabase
       .from("tournament_players")
       .select("tournament_category_id")
@@ -61,7 +62,9 @@ export default async function CategoryPlayersPage({
   ]);
 
   if (!tournament) notFound();
-  if (!category || category.tournament_id !== tid) notFound();
+  if (!category || category.tournament_id !== tid || !category.is_active) {
+    notFound();
+  }
 
   const categoryLabel = categoryFullLabel(
     category.age as CategoryAge,

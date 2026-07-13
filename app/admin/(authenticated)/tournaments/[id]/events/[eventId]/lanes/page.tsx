@@ -49,10 +49,12 @@ export default async function LanesPage({
 
   const { data: category } = await supabase
     .from("tournament_categories")
-    .select("id, tournament_id, age, gender")
+    .select("id, tournament_id, age, gender, is_active")
     .eq("id", event.tournament_category_id)
     .maybeSingle();
-  if (!category || category.tournament_id !== tid) notFound();
+  if (!category || category.tournament_id !== tid || !category.is_active) {
+    notFound();
+  }
 
   const { data: tournament } = await supabase
     .from("tournaments")

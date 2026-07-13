@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { classifyLane, groupKey, teamSize } from "@/lib/domain/team-from-lane";
 import { createClient } from "@/lib/supabase/server";
+import { requireActiveCategory } from "@/lib/supabase/category-guards";
 import type { Database, EventType } from "@/lib/supabase/database.types";
 
 export type LaneActionResult = { error?: string; message?: string };
@@ -45,11 +46,16 @@ async function loadEvent(supabase: Client, tournamentId: number, eventId: number
 
   const { data: category } = await supabase
     .from("tournament_categories")
-    .select("id, tournament_id")
+    .select("id, tournament_id, is_active")
     .eq("id", event.tournament_category_id)
     .maybeSingle();
   if (!category || category.tournament_id !== tournamentId) {
     return { error: "대회 정보가 일치하지 않습니다." as const };
+  }
+  if (!category.is_active) {
+    return {
+      error: "사용 중지된 종별입니다. 대회 상세에서 다시 활성화해주세요." as const,
+    };
   }
   return { event };
 }

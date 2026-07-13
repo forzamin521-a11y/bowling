@@ -53,7 +53,8 @@ export default async function PublicTournamentPage({
   const { data: categories } = await supabase
     .from("tournament_categories")
     .select("id, age, gender")
-    .eq("tournament_id", tid);
+    .eq("tournament_id", tid)
+    .eq("is_active", true);
 
   const status = (withStatus?.status ?? "upcoming") as TournamentStatus;
 

@@ -25,7 +25,8 @@ export default async function PlayersLandingPage({
     supabase
       .from("tournament_categories")
       .select("id, age, gender")
-      .eq("tournament_id", tid),
+      .eq("tournament_id", tid)
+      .eq("is_active", true),
   ]);
 
   if (!tournament) notFound();

@@ -189,6 +189,7 @@ create table tournament_categories (
   tournament_id bigint not null references tournaments(id) on delete cascade,
   age category_age not null,
   gender gender not null,
+  is_active boolean not null default true,
   created_at timestamptz not null default now(),
   unique (tournament_id, age, gender)
 );

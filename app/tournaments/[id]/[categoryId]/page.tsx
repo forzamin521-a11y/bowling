@@ -22,10 +22,12 @@ export default async function PublicCategoryPage({
 
   const { data: category } = await supabase
     .from("tournament_categories")
-    .select("id, tournament_id, age, gender")
+    .select("id, tournament_id, age, gender, is_active")
     .eq("id", cid)
     .maybeSingle();
-  if (!category || category.tournament_id !== tid) notFound();
+  if (!category || category.tournament_id !== tid || !category.is_active) {
+    notFound();
+  }
 
   const { data: tournament } = await supabase
     .from("tournaments")

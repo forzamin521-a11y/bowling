@@ -136,15 +136,18 @@ export interface Database {
           age: CategoryAge;
           gender: Gender;
           created_at: string;
+          is_active: boolean;
         };
         Insert: {
           tournament_id: number;
           age: CategoryAge;
           gender: Gender;
+          is_active?: boolean;
         };
         Update: Partial<{
           age: CategoryAge;
           gender: Gender;
+          is_active: boolean;
         }>;
       };
       tournament_events: {

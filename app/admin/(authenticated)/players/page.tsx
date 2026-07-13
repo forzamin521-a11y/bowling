@@ -13,7 +13,10 @@ export default async function MasterPlayersPage() {
   const supabase = await createClient();
   const [{ data: regions }, { data: categories }] = await Promise.all([
     supabase.from("regions").select("id, name").order("sort_order"),
-    supabase.from("tournament_categories").select("age, gender"),
+    supabase
+      .from("tournament_categories")
+      .select("age, gender")
+      .eq("is_active", true),
   ]);
 
   // 전체 대회에 존재하는 (연령+성별) 종별의 고유 집합

@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { teamLabelForPosition } from "@/lib/domain/team-label";
 import { createClient } from "@/lib/supabase/server";
+import { requireActiveCategory } from "@/lib/supabase/category-guards";
 import type { Database, Gender } from "@/lib/supabase/database.types";
 
 type Client = Awaited<ReturnType<typeof createClient>>;
@@ -222,6 +223,8 @@ export async function registerPlayers(input: {
   const { tournamentId, categoryId, regionId, affiliationName, entries } =
     parsed.data;
   const supabase = await createClient();
+  const category = await requireActiveCategory(supabase, tournamentId, categoryId);
+  if ("error" in category) return { error: category.error };
 
   const affiliationId = await ensureAffiliation(
     supabase,
@@ -363,6 +366,8 @@ export async function updatePlayer(input: {
     affiliationName,
   } = parsed.data;
   const supabase = await createClient();
+  const category = await requireActiveCategory(supabase, tournamentId, categoryId);
+  if ("error" in category) return { error: category.error };
 
   const affiliationId = await ensureAffiliation(
     supabase,
@@ -391,7 +396,8 @@ export async function updatePlayer(input: {
       affiliation_name: affiliationName,
     })
     .eq("id", tournamentPlayerId)
-    .eq("tournament_id", tournamentId);
+    .eq("tournament_id", tournamentId)
+    .eq("tournament_category_id", categoryId);
 
   if (error) {
     if (error.message.includes("duplicate")) {
@@ -412,12 +418,16 @@ export async function deletePlayer(
   tournamentPlayerId: number,
 ): Promise<PlayerActionResult> {
   const supabase = await createClient();
+  const category = await requireActiveCategory(supabase, tournamentId, categoryId);
+  if ("error" in category) return { error: category.error };
+
   // 선수번호는 재사용하지 않음(빈 번호 그대로). 트리거가 그룹 라벨 재계산.
   const { error } = await supabase
     .from("tournament_players")
     .delete()
     .eq("id", tournamentPlayerId)
-    .eq("tournament_id", tournamentId);
+    .eq("tournament_id", tournamentId)
+    .eq("tournament_category_id", categoryId);
 
   if (error) return { error: error.message };
   revalidatePath(`/admin/tournaments/${tournamentId}/players/${categoryId}`);

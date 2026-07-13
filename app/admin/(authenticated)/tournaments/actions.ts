@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { resolveCategoryMutation } from "@/lib/domain/category-lifecycle";
+import {
+  requireActiveCategory,
+  requireActiveEvent,
+} from "@/lib/supabase/category-guards";
 import type {
   CategoryAge,
   EventType,
@@ -100,30 +105,73 @@ export async function deleteTournament(id: number) {
 
 /* ─────────── 종별 ─────────── */
 
-export async function toggleCategory(
-  tournamentId: number,
-  age: CategoryAge,
-  gender: Gender,
-  checked: boolean,
-) {
+const categoryToggleSchema = z.object({
+  tournamentId: z.number().int().positive(),
+  categoryId: z.number().int().positive().nullable(),
+  age: z.enum(["ELEM_U10", "ELEM_U12", "MIDDLE", "HIGH", "COLLEGE", "ADULT"]),
+  gender: z.enum(["M", "F"]),
+  checked: z.boolean(),
+});
+
+export async function toggleCategory(input: {
+  tournamentId: number;
+  categoryId: number | null;
+  age: CategoryAge;
+  gender: Gender;
+  checked: boolean;
+}) {
+  const parsed = categoryToggleSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: "종별 상태 변경 요청이 올바르지 않습니다." };
+  }
+
+  const { tournamentId, categoryId, age, gender, checked } = parsed.data;
   const supabase = await createClient();
-  if (checked) {
+  let existing: { id: number } | null = null;
+
+  if (categoryId !== null) {
+    const { data, error } = await supabase
+      .from("tournament_categories")
+      .select("id, tournament_id, age, gender")
+      .eq("id", categoryId)
+      .maybeSingle();
+    if (error) return { error: error.message };
+    if (!data || data.tournament_id !== tournamentId) {
+      return { error: "대회 종별 정보가 일치하지 않습니다." };
+    }
+    if (data.age !== age || data.gender !== gender) {
+      return { error: "종별 상태 변경 요청이 일치하지 않습니다." };
+    }
+    existing = data;
+  } else if (!checked) {
+    return {};
+  }
+
+  const mutation = resolveCategoryMutation({
+    categoryId: existing?.id ?? null,
+    tournamentId,
+    age,
+    gender,
+    active: checked,
+  });
+
+  if (mutation.kind === "insert") {
     const { error } = await supabase
       .from("tournament_categories")
-      .insert({ tournament_id: tournamentId, age, gender });
+      .insert(mutation.values);
     if (error && !error.message.includes("duplicate")) {
       return { error: error.message };
     }
-  } else {
+  } else if (mutation.kind === "update") {
     const { error } = await supabase
       .from("tournament_categories")
-      .delete()
-      .eq("tournament_id", tournamentId)
-      .eq("age", age)
-      .eq("gender", gender);
+      .update(mutation.patch)
+      .eq("id", mutation.categoryId)
+      .eq("tournament_id", tournamentId);
     if (error) return { error: error.message };
   }
   revalidatePath(`/admin/tournaments/${tournamentId}`);
+  revalidatePath(`/tournaments/${tournamentId}`);
   return {};
 }
 
@@ -183,6 +231,9 @@ export async function addEvent(
   if (!parsed.success) return { fieldErrors: zodErrorsToFieldErrors(parsed.error) };
 
   const supabase = await createClient();
+  const category = await requireActiveCategory(supabase, tournamentId, categoryId);
+  if ("error" in category) return { error: category.error };
+
   const { error } = await supabase.from("tournament_events").insert({
     tournament_category_id: categoryId,
     event_type: parsed.data.event_type,
@@ -216,6 +267,9 @@ export async function updateEvent(
   },
 ) {
   const supabase = await createClient();
+  const event = await requireActiveEvent(supabase, tournamentId, eventId);
+  if ("error" in event) return { error: event.error };
+
   const { error } = await supabase
     .from("tournament_events")
     .update(patch)
@@ -227,6 +281,9 @@ export async function updateEvent(
 
 export async function deleteEvent(tournamentId: number, eventId: number) {
   const supabase = await createClient();
+  const event = await requireActiveEvent(supabase, tournamentId, eventId);
+  if ("error" in event) return { error: event.error };
+
   const { error } = await supabase
     .from("tournament_events")
     .delete()
