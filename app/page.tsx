@@ -7,8 +7,10 @@ import type { TournamentStatus } from "@/lib/supabase/database.types";
 import { createPublicClient } from "@/lib/supabase/public";
 import { cn } from "@/lib/utils";
 
-// 서울 CDN 엣지에서 캐시 서빙, 60초마다 백그라운드 재검증(ISR)
-export const revalidate = 60;
+// Per-request CSP nonces must match the nonce on Next.js inline scripts.
+// This disables the previous 60-second ISR cache for the home page; restore ISR only
+// after removing inline scripts/styles or introducing a CSP strategy compatible with caching.
+export const dynamic = "force-dynamic";
 
 const STATUS_ORDER: Record<TournamentStatus, number> = {
   ongoing: 0,
