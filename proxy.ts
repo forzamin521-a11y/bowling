@@ -56,6 +56,9 @@ function buildContentSecurityPolicy(nonce: string) {
 }
 
 function applySecurityHeaders(response: NextResponse, csp: string) {
+  response.headers.delete("X-Powered-By");
+  // Vercel may restore this reserved platform header after the function response.
+  response.headers.delete("Server");
   response.headers.set("Content-Security-Policy", csp);
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
